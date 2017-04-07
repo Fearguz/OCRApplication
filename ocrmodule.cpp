@@ -14,6 +14,7 @@ LeptonicaOCRModule::LeptonicaOCRModule(const std::string& lang) : m_ocrApi{new t
 LeptonicaOCRModule::~LeptonicaOCRModule()
 {
     m_ocrApi->End();
+    delete m_ocrApi;
 }
 
 const std::string LeptonicaOCRModule::processImage(const std::string &filepath, const Config* config) const

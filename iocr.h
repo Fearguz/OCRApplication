@@ -9,6 +9,7 @@ using Config = std::unordered_map<std::string, double>;
 class IOCR
 {
 public:
+    virtual ~IOCR() = default;
     virtual const std::string processImage(const std::string& filepath, const Config* config) const = 0;
 };
 

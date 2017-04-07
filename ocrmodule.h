@@ -18,7 +18,7 @@ public:
     LeptonicaOCRModule(LeptonicaOCRModule&&) = default;
     LeptonicaOCRModule& operator=(const LeptonicaOCRModule&) = default;
     LeptonicaOCRModule& operator=(LeptonicaOCRModule&&) = default;
-    ~LeptonicaOCRModule();
+    ~LeptonicaOCRModule() override;
 
     const std::string processImage(const std::string& filepath, const Config* config) const override;
 
