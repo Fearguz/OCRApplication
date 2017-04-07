@@ -4,26 +4,19 @@
 
 LeptonicaOCRModule::LeptonicaOCRModule(const std::string& lang) : m_language{lang}, m_ocrApi{new tesseract::TessBaseAPI}
 {
-    initOcrApi();
+    initOcrApi(m_language);
 }
 
 LeptonicaOCRModule::LeptonicaOCRModule(const LeptonicaOCRModule& oth) : m_language{oth.m_language}, m_ocrApi{new tesseract::TessBaseAPI}
 {
-    initOcrApi();
+    initOcrApi(m_language);
 }
 
 LeptonicaOCRModule& LeptonicaOCRModule::operator=(const LeptonicaOCRModule& oth)
 {
     if (this != &oth)
     {
-        tesseract::TessBaseAPI* tmpApi {new tesseract::TessBaseAPI};
-        if (tmpApi->Init(nullptr, oth.m_language.c_str()))
-        {
-            throw std::runtime_error("Could not initialize tesseract API.");
-        }
-        deinitOcrApi();
-        m_language = oth.m_language;
-        m_ocrApi.reset(tmpApi);
+        changeLanguage(oth.m_language);
     }
     return *this;
 }
@@ -31,6 +24,22 @@ LeptonicaOCRModule& LeptonicaOCRModule::operator=(const LeptonicaOCRModule& oth)
 LeptonicaOCRModule::~LeptonicaOCRModule()
 {
     deinitOcrApi();
+}
+
+void LeptonicaOCRModule::changeLanguage(const std::string &lang)
+{
+    if (m_language != lang)
+    {
+        tesseract::TessBaseAPI* tmpApi {new tesseract::TessBaseAPI};
+        if (tmpApi->Init(nullptr, lang.c_str()))
+        {
+            throw std::runtime_error("Could not initialize tesseract API.");
+        }
+
+        deinitOcrApi();
+        m_language = lang;
+        m_ocrApi.reset(tmpApi);
+    }
 }
 
 const std::string LeptonicaOCRModule::processImage(const std::string &filepath, const Config* config) const
@@ -55,9 +64,9 @@ const std::string LeptonicaOCRModule::processImage(const std::string &filepath, 
     return ret;
 }
 
-void LeptonicaOCRModule::initOcrApi()
+void LeptonicaOCRModule::initOcrApi(const std::string& lang)
 {
-    if (m_ocrApi->Init(nullptr, m_language.c_str()))
+    if (m_ocrApi->Init(nullptr, lang.c_str()))
     {
         throw std::runtime_error("Could not initialize tesseract API.");
     }

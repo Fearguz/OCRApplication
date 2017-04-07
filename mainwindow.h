@@ -19,6 +19,7 @@ public:
 
 private slots:
     void processFile();
+    void languageChanged(bool triggered);
 
 private:
     IOCR& m_ocrModule;

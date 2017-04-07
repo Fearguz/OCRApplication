@@ -18,13 +18,14 @@ public:
     LeptonicaOCRModule& operator=(LeptonicaOCRModule&& oth) = default;
     ~LeptonicaOCRModule() override;
 
+    void changeLanguage(const std::string& lang) override;
     const std::string processImage(const std::string& filepath, const Config* config) const override;
 
 private:
     std::string m_language;
     std::unique_ptr<tesseract::TessBaseAPI> m_ocrApi;
 
-    void initOcrApi();
+    void initOcrApi(const std::string& lang);
     void deinitOcrApi();
     Pix* preprocessImage(Pix* originalImage, const Config* config) const;
 };
