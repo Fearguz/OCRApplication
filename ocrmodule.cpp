@@ -1,20 +1,36 @@
 #include "ocrmodule.h"
 #include <stdexcept>
 #include <leptonica/allheaders.h>
-#include <tesseract/baseapi.h>
 
-LeptonicaOCRModule::LeptonicaOCRModule(const std::string& lang) : m_ocrApi{new tesseract::TessBaseAPI}
+LeptonicaOCRModule::LeptonicaOCRModule(const std::string& lang) : m_language{lang}, m_ocrApi{new tesseract::TessBaseAPI}
 {
-    if (m_ocrApi->Init(nullptr, lang.c_str()))
+    initOcrApi();
+}
+
+LeptonicaOCRModule::LeptonicaOCRModule(const LeptonicaOCRModule& oth) : m_language{oth.m_language}, m_ocrApi{new tesseract::TessBaseAPI}
+{
+    initOcrApi();
+}
+
+LeptonicaOCRModule& LeptonicaOCRModule::operator=(const LeptonicaOCRModule& oth)
+{
+    if (this != &oth)
     {
-        throw std::runtime_error("Could not initialize tesseract API.");
+        tesseract::TessBaseAPI* tmpApi {new tesseract::TessBaseAPI};
+        if (tmpApi->Init(nullptr, oth.m_language.c_str()))
+        {
+            throw std::runtime_error("Could not initialize tesseract API.");
+        }
+        deinitOcrApi();
+        m_language = oth.m_language;
+        m_ocrApi.reset(tmpApi);
     }
+    return *this;
 }
 
 LeptonicaOCRModule::~LeptonicaOCRModule()
 {
-    m_ocrApi->End();
-    delete m_ocrApi;
+    deinitOcrApi();
 }
 
 const std::string LeptonicaOCRModule::processImage(const std::string &filepath, const Config* config) const
@@ -37,6 +53,22 @@ const std::string LeptonicaOCRModule::processImage(const std::string &filepath, 
     pixDestroy(&binarizedImage);
     pixDestroy(&originalImage);
     return ret;
+}
+
+void LeptonicaOCRModule::initOcrApi()
+{
+    if (m_ocrApi->Init(nullptr, m_language.c_str()))
+    {
+        throw std::runtime_error("Could not initialize tesseract API.");
+    }
+}
+
+void LeptonicaOCRModule::deinitOcrApi()
+{
+    if (m_ocrApi)
+    {
+        m_ocrApi->End();
+    }
 }
 
 Pix* LeptonicaOCRModule::preprocessImage(Pix *originalImage, const Config* /* unused */) const

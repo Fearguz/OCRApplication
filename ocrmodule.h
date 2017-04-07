@@ -3,28 +3,29 @@
 
 #include "iocr.h"
 #include <string>
+#include <memory>
+#include <tesseract/baseapi.h>
 
-namespace tesseract
-{
-    class TessBaseAPI;  // Forward declaration
-}
 struct Pix;  // Forward declaration
 
 class LeptonicaOCRModule : public IOCR
 {
 public:
-    LeptonicaOCRModule(const std::string& lang);
-    LeptonicaOCRModule(const LeptonicaOCRModule&) = default;
-    LeptonicaOCRModule(LeptonicaOCRModule&&) = default;
-    LeptonicaOCRModule& operator=(const LeptonicaOCRModule&) = default;
-    LeptonicaOCRModule& operator=(LeptonicaOCRModule&&) = default;
+    explicit LeptonicaOCRModule(const std::string& lang);
+    LeptonicaOCRModule(const LeptonicaOCRModule& oth);
+    LeptonicaOCRModule(LeptonicaOCRModule&& oth) = default;
+    LeptonicaOCRModule& operator=(const LeptonicaOCRModule& oth);
+    LeptonicaOCRModule& operator=(LeptonicaOCRModule&& oth) = default;
     ~LeptonicaOCRModule() override;
 
     const std::string processImage(const std::string& filepath, const Config* config) const override;
 
 private:
-    tesseract::TessBaseAPI* m_ocrApi {nullptr};
+    std::string m_language;
+    std::unique_ptr<tesseract::TessBaseAPI> m_ocrApi;
 
+    void initOcrApi();
+    void deinitOcrApi();
     Pix* preprocessImage(Pix* originalImage, const Config* config) const;
 };
 
